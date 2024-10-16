@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+@font-face {
+  font-family: 'Minecraftia';
+  src: url('/fonts/minecraftia.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'PressStart2P';
+  src: url('/fonts/PressStart2P.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Minecraftia', sans-serif;
+  background-color: #becee2;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance; /* This property may not be valid in all browsers */
+  }
+}
+html, body {
+  margin: 0;  /* Reset default margins */
+  padding: 0;  /* Reset default padding */
+  height: 100%;  /* Ensure full height */
+  
+}
+
