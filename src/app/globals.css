@@ -45,3 +45,7 @@ html, body {
   
 }
 
+canvas {
+  background-color: #eee;
+  image-rendering: pixelated;
+}

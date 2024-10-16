@@ -5,44 +5,61 @@ import Link from "next/link";
 import { signIn } from 'next-auth/react';
 
 export default function RegisterPage() {
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [password2, setPassword2] = useState('')
-    const [creatingUser, setCreatingUser] = useState(false)
-    const [userCreated, setUserCreated] = useState(false)
-    const [error, setError] = useState(false)
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [password2, setPassword2] = useState('');
+    const [creatingUser, setCreatingUser] = useState(false);
+    const [userCreated, setUserCreated] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+
     async function handleFormSubmit(ev) {
-        ev.preventDefault()
+        ev.preventDefault();
         setCreatingUser(true);
-        setError(false)
-        setUserCreated(false)
+        setErrorMessage('');
+        setUserCreated(false);
+        
+        if (password !== password2) {
+            setErrorMessage("Passwords do not match.");
+            setCreatingUser(false);
+            return;
+        }
+
         const response = await fetch('/api/register', {
             method: 'POST',
-            body: JSON.stringify({name, email, password, password2}),
-            headers: {'Content-Type': 'application/json'}
+            body: JSON.stringify({ name, email, password, password2 }),
+            headers: { 'Content-Type': 'application/json' }
         });
+        console.log(response);
+
         if (!response.ok) {
-            setError(true);
-        }
-        else{
-            setUserCreated(true)
-        }
+            const errorData = await response.json();
+            console.error('Error:', errorData);
+            setErrorMessage(errorData.error || "An error has occurred. Please try again later.");
+        } else {
+            setUserCreated(true);
+            // Clear the fields after successful registration
+            setName('');
+            setEmail('');
+            setPassword('');
+            setPassword2('');
+        }        
         setCreatingUser(false);        
     }
+
     return (
         <section className="flex items-center justify-center min-h-screen bg-gray-100">
-            <form className="w-128 mx-auto bg-white p-12 rounded-lg shadow-md"> {/* Increased max width */}
+            <form onSubmit={handleFormSubmit} className="w-128 mx-auto bg-white p-12 rounded-lg shadow-md">
                 <h1 className="text-center text-primary text-4xl mb-6 font-bold">Register</h1>
 
                 {userCreated && (
-                <div className="my-4 text-center">User has been succefully created.<br/>Now you can{' '}
-                    <Link className="underline" href={'/login'}>Login</Link>
-                </div>
+                    <div className="my-4 text-center text-green-600">
+                        User has been successfully created.<br />Now you can{' '}
+                        <Link className="underline" href={'/login'}>Login</Link>
+                    </div>
                 )}
-                {error && (
-                    <div className="my-4 text-center">An error has occured.<br/>Please try again later
-                </div>
+                {errorMessage && (
+                    <div className="my-4 text-center text-red-600">{errorMessage}</div>
                 )}
 
                 <div className="mb-6">
@@ -96,7 +113,7 @@ export default function RegisterPage() {
                 <button
                     disabled={creatingUser}
                     type="submit"
-                    className="w-full bg-500 text-white px-4 py-3 rounded-md transition-colors duration-300 hover:bg-700 font-semibold"
+                    className="w-full bg-500 text-white px-4 py-3 rounded-md transition-colors duration-300 hover:bg-700 font-semibold" 
                 >
                     Register
                 </button>
@@ -106,10 +123,15 @@ export default function RegisterPage() {
                 <button
                     disabled={creatingUser}
                     onClick={() => {
-                        setCreatingUser(true); // Set loading state
-                        signIn('google', { callbackUrl: '/' }).finally(() => {
-                            setCreatingUser(false); // Reset loading state
-                        });
+                        setCreatingUser(true);
+                        signIn('google', { callbackUrl: '/game' })
+                            .catch((error) => {
+                                console.error('Google sign-in error:', error);
+                                setErrorMessage("Google sign-in failed. Please try again.");
+                            })
+                            .finally(() => {
+                                setCreatingUser(false);
+                            });
                     }}
                     type="button"
                     className="flex items-center justify-center w-full bg-gray-100 px-4 py-3 rounded-md transition-colors duration-300 hover:bg-gray-200"
