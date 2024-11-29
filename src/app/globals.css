@@ -30,7 +30,7 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: 'Minecraftia', sans-serif;
-  background-color: #becee2;
+  background-color: #aed4fc;
 }
 
 @layer utilities {
@@ -45,3 +45,7 @@ html, body {
   
 }
 
+canvas {
+  background-color: #eee;
+  image-rendering: pixelated;
+}

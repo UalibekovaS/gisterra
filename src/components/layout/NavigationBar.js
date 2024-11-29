@@ -33,7 +33,7 @@ export default function NavigationBar() {
                     {/* Get Started Button */}
                     <Link 
                         href="/register" 
-                        className="groupflex items-center justify-center bg-500 text-white px-4 py-2 rounded-full transition-all duration-300 ease-in-out inline-flex items-center hover:bg-700 transition-colors"
+                        className="group flex items-center justify-center bg-500 text-white px-4 py-2 rounded-full transition-all duration-300 ease-in-out inline-flex items-center hover:bg-700 transition-colors"
                         onMouseEnter={() => setIsHovered(true)} // Set hover state
                         onMouseLeave={() => setIsHovered(false)} // Reset hover state
                     >
