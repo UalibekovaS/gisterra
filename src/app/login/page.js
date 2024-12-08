@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from "next/link";
 import { signIn } from 'next-auth/react';
 
+
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -25,7 +26,7 @@ export default function LoginPage() {
             setErrorMessage(response.error || "An error occurred during login.");
         } else {
             // Redirect to the main page upon successful login
-            window.location.href = '/game'; // Adjust this path to your main page
+            window.location.href = '/redirect'; // Adjust this path to your main page
         }
 
         setLoggingIn(false);
@@ -74,7 +75,7 @@ export default function LoginPage() {
                     disabled={loggingIn}
                     onClick={() => {
                         setLoggingIn(true);
-                        signIn('google', { callbackUrl: '/game' })
+                        signIn('google', { callbackUrl: '/redirect' })
                             .catch((error) => {
                                 console.error('Google sign-in error:', error);
                                 setErrorMessage("Google sign-in failed. Please try again.");

@@ -1,108 +1,134 @@
-(function() {
+(function () {
     // Store tasks in a global variable
     var taskData = [];
+    var assignedTaskId = null; // Track the current assigned task ID
+    var assignedTask = false; // Track if the user has a pending task
 
-    // Function to fetch tasks from your server
-    function fetchTasksFromAPI() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'http://localhost:4001/getTasks', true);  // Replace with your server URL
+    // Function to check the user's task status from the server
+    async function checkUserTaskStatus() {
+        const userId = getUserIdFromUrl(); // Get userId from URL
 
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {  // Request is complete
-                if (xhr.status === 200) {  // Successfully received a response
-                    try {
-                        taskData = JSON.parse(xhr.responseText);  // Parse the JSON response from the server
-                        console.log("Tasks fetched:", taskData);
-                    } catch (e) {
-                        console.error("Error parsing tasks from server:", e);  // Handle JSON parsing errors
-                    }
-                } else {
-                    console.error("Failed to fetch tasks. Status:", xhr.status);  // Log the error if the request fails
-                }
+        if (!userId) {
+            console.error("User ID not found in URL.");
+            $gameMessage.add("Error: User ID is required to access tasks.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:3000/api/user-task-status/${userId}`);
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch user task status. Status: ' + response.status);
             }
-        };
 
-        xhr.send();  // Send the request to the server
+            const data = await response.json();
+            console.log("User task status:", data);
+
+            // Update the assignedTask variable based on the user's status
+            assignedTask = data.status === 'pending';
+        } catch (error) {
+            console.error("Error checking user task status:", error);
+        }
     }
 
-    // Fetch tasks when the game starts
-    fetchTasksFromAPI();
+    // Function to fetch tasks from your server
+    async function fetchTasksFromAPI() {
+        await checkUserTaskStatus(); // Ensure the user task status is checked before continuing
+
+        if (assignedTask) {
+            $gameMessage.add("You cannot take another task until your \ncurrent task is completed.");
+            return; // Exit if the user already has a pending task
+        }
+
+        try {
+            const response = await fetch('http://localhost:3000/api/tasks'); // Replace with your server URL
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch tasks. Status: ' + response.status);
+            }
+
+            taskData = await response.json();
+            taskData = taskData.filter(task => task.status === 'not assigned'); // Filter only unassigned tasks
+            console.log("Tasks fetched:", taskData);
+        } catch (error) {
+            console.error("Error fetching tasks:", error); // Handle fetch errors
+        }
+    }
 
     // Function to display tasks and allow player to choose
     function displayTasks() {
-        var tasks = taskData;  // Fetch tasks
+        if (assignedTask) {
+            console.log("You still have an assigned task.");
+            $gameMessage.add("You cannot take another task until your \ncurrent task is completed.");
+            return; // Exit if the player still has an active task
+        }
 
-        if (tasks.length === 0) {
-            console.log("No tasks to display");
+        if (taskData.length === 0) {
+            console.log("No tasks to display.");
             $gameMessage.add("No tasks available at the moment.");
-            return;  // Exit if no tasks are available
+            return; // Exit if no tasks are available
         }
 
         console.log("Displaying tasks:");
-        tasks.forEach(function(task, index) {
-            console.log(index + 1 + ". " + task.name);  // For debugging, log each task
-        });
+        taskData.forEach((task, index) => console.log(index + 1 + ". " + task.title));
 
         // Display tasks in the RPG Maker MV message window
         $gameMessage.add("Available tasks:");
-        tasks.forEach(function(task) {
-            $gameMessage.add(task.name);  // Display each task in the message window
-        });
+        taskData.forEach(task => $gameMessage.add(task.title));
 
         // Show the task choices in the choice window
-        var taskChoices = tasks.map(function(task) {
-            return task.name;  // Create a list of task names for the choices
-        });
+        const taskChoices = taskData.map(task => task.title);
 
-        // Set up the choices for the player to select
         $gameMessage.add("Choose a task:");
-
-        // Set the choices (task names) and specify callback function for the player's choice
         $gameMessage.setChoices(taskChoices, 0, -1);
 
-        // Handle the player's choice selection
-        $gameMessage.setChoiceCallback(function(choiceIndex) {
-            // When the player selects a task
-            var selectedTask = tasks[choiceIndex];  // Get the selected task
-            $gameVariables.setValue(1, selectedTask.id);  // Store the task ID in a game variable (e.g., variable 1)
-        
-            // Display the selected task in the message window **after** they choose
-            $gameMessage.add("You have chosen the task: " + selectedTask.name);
+        $gameMessage.setChoiceCallback(choiceIndex => {
+            const selectedTask = taskData[choiceIndex];
+            $gameVariables.setValue(1, selectedTask._id); // Store the task ID in a game variable (e.g., variable 1)
+
+            $gameMessage.add("You have chosen the task: " + selectedTask.title);
             $gameMessage.add("Good luck with your task!");
-    
+
             saveTaskToServer(selectedTask);
-            // Wait for a few seconds before continuing the event and closing the message window
+
+            assignedTask = true; // Update the assigned task status
         });
-        
     }
 
     // Make the function accessible globally to call when needed
     window.displayTasks = displayTasks;
 
+    // Get the user ID from the URL
+    function getUserIdFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('userId');
+    }
 
+    // Function to save the selected task to the server
     function saveTaskToServer(selectedTask) {
-        var userId = 1; // Example user ID (replace with the actual user ID)
-        var taskDataToSave = {
+        const userId = getUserIdFromUrl();
+        const taskDataToSave = {
             userId: userId,
-            taskId: selectedTask.id,
-            taskName: selectedTask.name
+            taskId: selectedTask._id,
+            taskName: selectedTask.title
         };
 
-        // Use fetch to send the data to your server
-        fetch('http://localhost:4001/saveTask', {
+        fetch('http://localhost:3000/api/saveTask', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(taskDataToSave)
         })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Task saved successfully:', data);
-        })
-        .catch(error => {
-            console.error('Error saving task to server:', error);
-        });
+            .then(response => response.json())
+            .then(data => {
+                console.log("Task saved successfully:", data);
+            })
+            .catch(error => {
+                console.error("Error saving task to server:", error);
+            });
     }
 
+    // Fetch tasks when the game starts
+    fetchTasksFromAPI();
 })();

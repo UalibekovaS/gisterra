@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { User } from "../../models/User";
 import bcrypt from "bcrypt";
+import { UserPoints } from "../../models/UserPoints"; // Import the UserPoints model
 
 // Connect to the MongoDB database
 async function connectToDatabase() {
@@ -37,7 +38,7 @@ export async function POST(req) {
         console.log("Received body:", body);
 
         // Destructure input data
-        const { password, password2, name, email } = body;
+        const { password, password2, name, email, role } = body; // You might receive the role as part of the request
         console.log("Received passwords:", { password, password2 });
 
         // Validate passwords
@@ -58,10 +59,31 @@ export async function POST(req) {
         // Hash the password
         body.password = await hashPassword(password);
 
+        // Set role if not provided (default to 'user', but 'organizer' role can be passed in registration)
+        body.role = role || 'user';  // Ensure a default role if none is provided
+
         // Create the user
         console.log("Creating user with data:", body);
-        const createdUser = await User.create(body);
+        const createdUser = await User.create({
+            name: body.name,
+            email: body.email,
+            password: body.password,  // The hashed password
+            role: body.role           // Explicitly pass role
+        });
         console.log("User created:", createdUser);
+
+        // Only create a UserPoints record if the user is not an organizer
+        if (body.role !== 'organizer') {
+            const userPoints = new UserPoints({
+                userId: createdUser._id,   // Link the points record to the user via userId
+                points: 0,                  // Default points
+                rank: 'Bronze'              // Default rank
+            });
+
+            // Save the UserPoints record
+            await userPoints.save();
+            console.log("UserPoints record created:", userPoints);
+        }
 
         // Return the created user response
         return new Response(JSON.stringify(createdUser), { status: 201 });

@@ -1,0 +1,146 @@
+/* Main container for the board */
+.board {
+    padding: 2rem;
+    background-color: #f4f7fa;
+    min-height: 100vh;
+    overflow: auto;  /* Allow scroll if content overflows */
+  }
+
+  /* Title of the board */
+  .board h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  /* Form container for creating tasks */
+  .form {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto 2rem auto;
+  }
+  
+  /* Input fields and buttons inside the form */
+  .form input,
+  .form textarea,
+  .form button {
+    width: 100%;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  .form input[type="text"],
+  .form textarea {
+    background-color: #f9f9f9;
+  }
+  
+  .form button {
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .form button:hover {
+    background-color: #45a049;
+  }
+  
+  .form button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  /* Task container */
+  .tasks {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    max-height: 60vh;  /* Restrict the height of the tasks section */
+    overflow-y: auto;  /* Enable vertical scrolling */
+  }
+  
+  /* Individual task card */
+  .task {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .task:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Task header */
+  .task h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+  
+  /* Task description and assigned user */
+  .task p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 1rem;
+  }
+  
+  .task p span {
+    font-weight: bold;
+  }
+  
+  /* Task status and buttons */
+  .task button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .task button:hover {
+    background-color: #0056b3;
+  }
+  
+  .task button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .tasks {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .tasks {
+      grid-template-columns: 1fr;
+    }
+  
+    .form {
+      padding: 1.5rem;
+    }
+  
+    .board h1 {
+      font-size: 2rem;
+    }
+  }
+  
