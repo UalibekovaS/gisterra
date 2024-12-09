@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import UserTask from '../../../models/UserTask';
+import {UserTask} from '../../../models/UserTask';
 
 // Connect to the MongoDB database
 async function connectToDatabase() {

@@ -466,7 +466,6 @@ function ConfigManager() {
 }
 
 ConfigManager.alwaysDash        = false;
-ConfigManager.commandRemember   = false;
 
 Object.defineProperty(ConfigManager, 'bgmVolume', {
     get: function() {
@@ -529,7 +528,6 @@ ConfigManager.save = function() {
 ConfigManager.makeData = function() {
     var config = {};
     config.alwaysDash = this.alwaysDash;
-    config.commandRemember = this.commandRemember;
     config.bgmVolume = this.bgmVolume;
     config.bgsVolume = this.bgsVolume;
     config.meVolume = this.meVolume;
@@ -539,7 +537,6 @@ ConfigManager.makeData = function() {
 
 ConfigManager.applyData = function(config) {
     this.alwaysDash = this.readFlag(config, 'alwaysDash');
-    this.commandRemember = this.readFlag(config, 'commandRemember');
     this.bgmVolume = this.readVolume(config, 'bgmVolume');
     this.bgsVolume = this.readVolume(config, 'bgsVolume');
     this.meVolume = this.readVolume(config, 'meVolume');
@@ -1712,7 +1709,6 @@ Object.defineProperties(TextManager, {
     buy             : TextManager.getter('command', 24),
     sell            : TextManager.getter('command', 25),
     alwaysDash      : TextManager.getter('message', 'alwaysDash'),
-    commandRemember : TextManager.getter('message', 'commandRemember'),
     bgmVolume       : TextManager.getter('message', 'bgmVolume'),
     bgsVolume       : TextManager.getter('message', 'bgsVolume'),
     meVolume        : TextManager.getter('message', 'meVolume'),

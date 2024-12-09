@@ -3415,6 +3415,8 @@ Game_Actor.prototype.initMembers = function() {
     this._nickname = '';
     this._classId = 0;
     this._level = 0;
+    this._hp = 0;
+    this._mp = 0;
     this._characterName = '';
     this._characterIndex = 0;
     this._faceName = '';
@@ -3429,10 +3431,58 @@ Game_Actor.prototype.initMembers = function() {
     this._lastCommandSymbol = '';
 };
 
-Game_Actor.prototype.setup = function(actorId) {
+// Function to fetch user name using the userId with a GET request
+
+
+// Global cache to store user data
+let userDataCache = {};
+
+async function fetchUserDataFromDatabase(userId) {
+    // Check if data is already cached
+    if (userDataCache[userId]) {
+        return userDataCache[userId]; // Return cached data if available
+    }
+
+    try {
+        // Fetch user details, including completed tasks
+        const response = await fetch(`http://localhost:3000/api/get-user?userId=${userId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch user data. Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.name && data.rank && data.points !== undefined && Array.isArray(data.completedTasks)) {
+            // Cache the fetched data
+            userDataCache[userId] = data;
+            return data;
+        } else {
+            console.error('Invalid user data:', data.error || 'Unknown error');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        return null;
+    }
+}
+
+
+// Extract userId from the URL
+function getUserIdFromUrl() {
+    const params = new URLSearchParams(window.location.search); // Extract query parameters
+    return params.get('userId'); // Get the userId value
+}
+
+Game_Actor.prototype.setup = async function(actorId) {
     var actor = $dataActors[actorId];
     this._actorId = actorId;
-    this._name = actor.name;
+    this._name = actor.name; // Default name from the database
     this._nickname = actor.nickname;
     this._profile = actor.profile;
     this._classId = actor.classId;
@@ -3443,7 +3493,61 @@ Game_Actor.prototype.setup = function(actorId) {
     this.initEquips(actor.equips);
     this.clearParamPlus();
     this.recoverAll();
+
+    const userId = getUserIdFromUrl(); // Get userId from URL
+    if (userId) {
+        try {
+            const fetchedData = await fetchUserDataFromDatabase(userId); // Await the fetch call
+            if (fetchedData) {
+                // Update actor name
+                this._name = fetchedData.name;
+                console.log(`User ID ${userId} name updated to: ${fetchedData.name}`);
+
+                // Update actor rank (classId) and points (exp)
+                this._classId = this.getRankClassId(fetchedData.rank); // Set classId based on rank
+
+                // Set level based on rank
+                this._level = this.getLevelFromRank(fetchedData.rank);
+                this._hp = fetchedData.points; 
+                const numCompletedTasks = fetchedData.completedTasks.length; // Get the number of tasks
+                this._mp = numCompletedTasks;
+                console.log(`User ID ${userId} rank updated to: ${fetchedData.rank}`);
+                console.log(`User ID ${userId} points updated to: ${fetchedData.points}`);
+                console.log(`User ID ${userId} level set to: ${this._level}`);
+            } else {
+                console.warn(`Failed to update data for User ID ${userId}`);
+            }
+        } catch (error) {
+            console.error('Error updating data:', error);
+        }
+    } else {
+        console.error('No userId found in URL');
+    }
 };
+
+// Helper function to get classId based on rank
+Game_Actor.prototype.getRankClassId = function(rank) {
+    switch(rank) {
+        case 'Bronze': return 1; // ClassId for Bronze
+        case 'Silver': return 2; // ClassId for Silver
+        case 'Gold': return 3; // ClassId for Gold
+        case 'Diamond': return 4; // ClassId for Diamond
+        default: return 1; // Default to Bronze if rank is unknown
+    }
+};
+
+// Helper function to set the level based on rank
+Game_Actor.prototype.getLevelFromRank = function(rank) {
+    switch(rank) {
+        case 'Bronze': return 1;
+        case 'Silver': return 2;
+        case 'Gold': return 3;
+        case 'Diamond': return 4;
+        default: return 1; // Default to level 1 for unknown rank
+    }
+};
+
+
 
 Game_Actor.prototype.actorId = function() {
     return this._actorId;
@@ -3540,7 +3644,7 @@ Game_Actor.prototype.currentExp = function() {
 };
 
 Game_Actor.prototype.currentLevelExp = function() {
-    return this.expForLevel(this._level);
+    return this._exp[this._classId] || 0;
 };
 
 Game_Actor.prototype.nextLevelExp = function() {
@@ -4005,20 +4109,7 @@ Game_Actor.prototype.performActionStart = function(action) {
     Game_Battler.prototype.performActionStart.call(this, action);
 };
 
-Game_Actor.prototype.performAction = function(action) {
-    Game_Battler.prototype.performAction.call(this, action);
-    if (action.isAttack()) {
-        this.performAttack();
-    } else if (action.isGuard()) {
-        this.requestMotion('guard');
-    } else if (action.isMagicSkill()) {
-        this.requestMotion('spell');
-    } else if (action.isSkill()) {
-        this.requestMotion('skill');
-    } else if (action.isItem()) {
-        this.requestMotion('item');
-    }
-};
+
 
 Game_Actor.prototype.performActionEnd = function() {
     Game_Battler.prototype.performActionEnd.call(this);

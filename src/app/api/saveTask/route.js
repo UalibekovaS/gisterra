@@ -1,4 +1,4 @@
-import UserTask from '../../models/UserTask';  // Correct import for default export
+import {UserTask} from '../../models/UserTask';  // Correct import for default export
 import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
 

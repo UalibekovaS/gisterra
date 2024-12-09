@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
-import UserTask from '../../models/UserTask';
+import {UserTask} from '../../models/UserTask';
 import Task from '../../models/Task';
 import { UserPoints } from '../../models/UserPoints';  // Import UserPoints model
 
@@ -57,11 +57,11 @@ export async function POST(req) {
         userPoints.points += 20;
   
         // Update user's rank if necessary (you can adjust the rank calculation based on points)
-        if (userPoints.points >= 100) {
+        if (userPoints.points >= 200) {
           userPoints.rank = 'Gold';
-        } else if (userPoints.points >= 50) {
+        } else if (userPoints.points >= 100) {
           userPoints.rank = 'Silver';
-        } else if (userPoints.points >= 20) {
+        } else if (userPoints.points >= 0) {
           userPoints.rank = 'Bronze';
         } else {
           userPoints.rank = 'Platinum'; // Example rank logic, you can modify this

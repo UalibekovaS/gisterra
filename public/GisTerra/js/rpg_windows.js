@@ -1594,25 +1594,10 @@ Window_MenuCommand.prototype.makeCommandList = function() {
 
 Window_MenuCommand.prototype.addMainCommands = function() {
     var enabled = this.areMainCommandsEnabled();
-    if (this.needsCommand('item')) {
-        this.addCommand(TextManager.item, 'item', enabled);
-    }
-    if (this.needsCommand('skill')) {
-        this.addCommand(TextManager.skill, 'skill', enabled);
-    }
-    if (this.needsCommand('equip')) {
-        this.addCommand(TextManager.equip, 'equip', enabled);
-    }
-    if (this.needsCommand('status')) {
-        this.addCommand(TextManager.status, 'status', enabled);
-    }
 };
 
 Window_MenuCommand.prototype.addFormationCommand = function() {
-    if (this.needsCommand('formation')) {
-        var enabled = this.isFormationEnabled();
-        this.addCommand(TextManager.formation, 'formation', enabled);
-    }
+
 };
 
 Window_MenuCommand.prototype.addOriginalCommands = function() {
@@ -1626,10 +1611,7 @@ Window_MenuCommand.prototype.addOptionsCommand = function() {
 };
 
 Window_MenuCommand.prototype.addSaveCommand = function() {
-    if (this.needsCommand('save')) {
-        var enabled = this.isSaveEnabled();
-        this.addCommand(TextManager.save, 'save', enabled);
-    }
+
 };
 
 Window_MenuCommand.prototype.addGameEndCommand = function() {
@@ -2672,7 +2654,6 @@ Window_Options.prototype.makeCommandList = function() {
 
 Window_Options.prototype.addGeneralOptions = function() {
     this.addCommand(TextManager.alwaysDash, 'alwaysDash');
-    this.addCommand(TextManager.commandRemember, 'commandRemember');
 };
 
 Window_Options.prototype.addVolumeOptions = function() {

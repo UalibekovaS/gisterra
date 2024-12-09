@@ -31,4 +31,4 @@ const userTaskSchema = new mongoose.Schema(
 
 const UserTask = mongoose.models.UserTask || mongoose.model('UserTask', userTaskSchema);
 
-export default UserTask;  // Default export
+export { UserTask };
